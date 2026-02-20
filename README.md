@@ -1,9 +1,9 @@
-# downbeat
-A vibe-coded rhythm runner designed for Intellivision, by Shaya Lyon
+### About Downbeat!
+Downbeat! is a vibe-coded rhythm runner designed for Intellivision, by Shaya Lyon.
 
-https://pickleshy.github.io/downbeat/ (web version)
+There is a web port at: https://pickleshy.github.io/downbeat/
 
-This was written over the last week in intybasic/assembly for Intellivision, but I was impatient to make it available to play (and who else has an Intellivision??) so tonight I ported it over to Javascript and put it on Github pages. And when I say “I,” I mean Claude and Claude Code and me :P 
+Downbeat! was written in IntyBASIC and Assembly for Intellivision, but I was impatient to make it available to play (and who else has an Intellivision??) so tonight I ported it over to Javascript and put it on Github pages. And when I say “I,” I mean Claude and Claude Code and me :P 
 
 This is still a WIP with more levels and a 2-player version to come. (Sabotage powers! Invincibility! Musicians sneezing!)
 
