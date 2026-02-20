@@ -1,7 +1,7 @@
 ### About Downbeat!
 Downbeat! is a vibe-coded rhythm runner designed for Intellivision designed by Shaya Lyon, with lots of help from Claude and Claude Code.
 
-This repo stores the a web version, which lives at: https://pickleshy.github.io/downbeat/
+This repo stores the web port, which lives at: https://pickleshy.github.io/downbeat/
 
 Downbeat! was written in IntyBASIC and Assembly for Intellivision, but I was impatient to make it available to play (and who else has an Intellivision??) so tonight I ported it over to Javascript and put it on Github pages. And when I say “I,” I mean Claude and Claude Code and me :P 
 
