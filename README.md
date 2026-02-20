@@ -1,5 +1,5 @@
 ### About Downbeat!
-Downbeat! is a vibe-coded rhythm runner designed for Intellivision, by Shaya Lyon with lots of help from Claude and Claude Code.
+Downbeat! is a vibe-coded rhythm runner designed for Intellivision designed by Shaya Lyon, with lots of help from Claude and Claude Code.
 
 This repo stores the a web version, which lives at: https://pickleshy.github.io/downbeat/
 
