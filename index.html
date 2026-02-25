@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>DOWNBEAT! - A Rhythm Runner</title>
     <meta name="description" content="Jump over musical notes to perform Scott Joplin's Maple Leaf Rag in this retro rhythm runner game!">
     <style>
@@ -10,10 +12,20 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
         #root {
             width: 100vw;
             height: 100vh;
+            overflow: hidden;
+        }
+        button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -573,7 +585,7 @@ const DOWNBEAT = () => {
     drawSprite(ctx, playerSprite, PLAYER_X, game.playerY, '#f10909', true);
   };
   
-  // Keyboard
+  // Keyboard and Touch
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === ' ' || e.key === 'ArrowUp') {
@@ -586,12 +598,27 @@ const DOWNBEAT = () => {
       gameRef.current.keys[e.key] = false;
     };
     
+    // Touch controls - tap anywhere to jump
+    const handleTouchStart = (e) => {
+      e.preventDefault();
+      gameRef.current.keys[' '] = true;
+    };
+    
+    const handleTouchEnd = (e) => {
+      e.preventDefault();
+      gameRef.current.keys[' '] = false;
+    };
+    
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: false });
     
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
   
@@ -638,7 +665,7 @@ const DOWNBEAT = () => {
             CHOOSE LEVEL
           </button>
           <p style={{ marginTop: '30px', fontSize: '14px', color: '#AAA' }}>
-            Controls: SPACE or ↑ to jump<br/>
+            Controls: SPACE or ↑ or TAP to jump<br/>
             Press again near peak to float!<br/>
             <br/>
             Jump over the notes.<br/>
