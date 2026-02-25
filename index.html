@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.6 cute";
+const VERSION = "1.1.7 celeb";
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -109,18 +109,18 @@ const DOWNBEAT = () => {
   
   // Sprite graphics (from IntyBASIC GRAM data)
   const sprites = {
-    // Player alien (8x8, stretched to 8x16) - CUTE VERSION
+    // Player alien (8x8, stretched to 8x16) - Using celebration pose as default
     player: [
-      '..XXXX..',
+      'X..XX..X',
       '.XXXXXX.',
       'XX.XX.XX',
       'XXXXXXXX',
       '..XXXX..',
-      '.X.XX.X.',
-      'XX.XX.XX',
-      'X......X'
+      '.XXXXXX.',
+      '..XXXX..',
+      '..X..X..'
     ],
-    // Player celebration (hands up!)
+    // Player celebration (hands up!) - same as default now
     celebration: [
       'X..XX..X',
       '.XXXXXX.',
