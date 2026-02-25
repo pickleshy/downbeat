@@ -598,15 +598,19 @@ const DOWNBEAT = () => {
       gameRef.current.keys[e.key] = false;
     };
     
-    // Touch controls - tap anywhere to jump
+    // Touch controls - tap anywhere to jump (only during gameplay)
     const handleTouchStart = (e) => {
-      e.preventDefault();
-      gameRef.current.keys[' '] = true;
+      if (gameState === 'playing') {
+        e.preventDefault();
+        gameRef.current.keys[' '] = true;
+      }
     };
     
     const handleTouchEnd = (e) => {
-      e.preventDefault();
-      gameRef.current.keys[' '] = false;
+      if (gameState === 'playing') {
+        e.preventDefault();
+        gameRef.current.keys[' '] = false;
+      }
     };
     
     window.addEventListener('keydown', handleKeyDown);
@@ -620,7 +624,7 @@ const DOWNBEAT = () => {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, []);
+  }, [gameState]);
   
   return (
     <div style={{
