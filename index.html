@@ -49,6 +49,23 @@ const DOWNBEAT = () => {
   const canvasRef = useRef(null);
   const [gameState, setGameState] = useState('menu'); // menu, levelselect, playing, gameover, complete
   const [currentLevel, setCurrentLevel] = useState(0);
+  const [canvasScale, setCanvasScale] = useState(4);
+  
+  // Calculate responsive canvas scale
+  useEffect(() => {
+    const updateScale = () => {
+      const maxWidth = window.innerWidth - 40; // 20px padding each side
+      const maxHeight = window.innerHeight - 200; // Leave room for UI
+      const scaleByWidth = Math.floor(maxWidth / CANVAS_WIDTH);
+      const scaleByHeight = Math.floor(maxHeight / CANVAS_HEIGHT);
+      const scale = Math.max(1, Math.min(scaleByWidth, scaleByHeight, 4));
+      setCanvasScale(scale);
+    };
+    
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
   
   // Load retro font
   useEffect(() => {
@@ -60,7 +77,9 @@ const DOWNBEAT = () => {
   }, []);
   
   // Game constants
-  const SCALE = 4; // Scale up the tiny 160x96 canvas
+  const CANVAS_WIDTH = 160;
+  const CANVAS_HEIGHT = 96;
+  const SCALE = 4; // Default scale for desktop
   const PLAYER_X = 40;
   const GROUND_Y = 40; // Player standing position (feet on ground)
   const JUMP_FRAMES = 36;
@@ -555,11 +574,12 @@ const DOWNBEAT = () => {
     ctx.fillStyle = '#FFF';
     ctx.fillRect(0, GROUND_LINE_Y, 160, 2);
     
-    // Hearts (top right) - only show filled hearts
-    const heartX = 144;
+    // Hearts (top right) - only show filled hearts, positioned from right edge
     const heartSpacing = 10;
+    const heartsWidth = game.hearts * heartSpacing;
+    const heartStartX = CANVAS_WIDTH - 8 - heartSpacing; // Start from right edge minus one heart
     for (let i = 0; i < game.hearts; i++) {
-      const x = heartX - i * heartSpacing;
+      const x = heartStartX - i * heartSpacing;
       drawSprite(ctx, sprites.heart, x, 0, '#990099');
     }
     
@@ -641,7 +661,7 @@ const DOWNBEAT = () => {
       <h1 style={{ 
         margin: '0 0 10px 0', 
         color: '#ffa227',
-        fontSize: '48px',
+        fontSize: 'clamp(24px, 8vw, 48px)',
         textShadow: '3px 3px 0 #000',
         fontFamily: '"Press Start 2P", "Courier New", monospace'
       }}>
@@ -650,14 +670,14 @@ const DOWNBEAT = () => {
       
       {gameState === 'menu' && (
         <div style={{ textAlign: 'center' }}>
-          <p style={{ marginBottom: '30px', fontSize: '18px' }}>
+          <p style={{ marginBottom: '30px', fontSize: 'clamp(14px, 4vw, 18px)' }}>
             A rhythm runner
           </p>
           <button
             onClick={() => setGameState('levelselect')}
             style={{
               padding: '15px 30px',
-              fontSize: '20px',
+              fontSize: 'clamp(14px, 4vw, 20px)',
               background: '#990099',
               color: '#FFF',
               border: '3px solid #000',
@@ -668,7 +688,7 @@ const DOWNBEAT = () => {
           >
             CHOOSE LEVEL
           </button>
-          <p style={{ marginTop: '30px', fontSize: '14px', color: '#AAA' }}>
+          <p style={{ marginTop: '30px', fontSize: 'clamp(10px, 3vw, 14px)', color: '#AAA' }}>
             Controls: SPACE or ↑ or TAP to jump<br/>
             Press again near peak to float!<br/>
             <br/>
@@ -677,7 +697,7 @@ const DOWNBEAT = () => {
           </p>
           <p style={{ 
             marginTop: '30px', 
-            fontSize: '12px', 
+            fontSize: 'clamp(8px, 2.5vw, 12px)', 
             color: '#666',
             textAlign: 'center'
           }}>
@@ -689,13 +709,13 @@ const DOWNBEAT = () => {
       
       {gameState === 'levelselect' && (
         <div style={{ textAlign: 'center' }}>
-          <h2 style={{ color: '#0FF', marginBottom: '30px' }}>SELECT LEVEL</h2>
+          <h2 style={{ color: '#0FF', marginBottom: '30px', fontSize: 'clamp(20px, 6vw, 32px)' }}>SELECT LEVEL</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <button
               onClick={() => startGame(0)}
               style={{
                 padding: '15px 30px',
-                fontSize: '18px',
+                fontSize: 'clamp(12px, 3.5vw, 18px)',
                 background: '#4d02d9',
                 color: '#FFF',
                 border: '3px solid #000',
@@ -710,7 +730,7 @@ const DOWNBEAT = () => {
               onClick={() => startGame(1)}
               style={{
                 padding: '15px 30px',
-                fontSize: '18px',
+                fontSize: 'clamp(12px, 3.5vw, 18px)',
                 background: '#990099',
                 color: '#FFF',
                 border: '3px solid #000',
@@ -733,12 +753,12 @@ const DOWNBEAT = () => {
         }}>
           <canvas
             ref={canvasRef}
-            width={160}
-            height={96}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
             style={{ 
               imageRendering: 'pixelated', 
-              width: `${160 * SCALE}px`, 
-              height: `${96 * SCALE}px` 
+              width: `${CANVAS_WIDTH * canvasScale}px`, 
+              height: `${CANVAS_HEIGHT * canvasScale}px` 
             }}
           />
         </div>
@@ -746,12 +766,12 @@ const DOWNBEAT = () => {
       
       {gameState === 'gameover' && (
         <div style={{ textAlign: 'center' }}>
-          <h2 style={{ color: '#f10909', fontSize: '36px' }}>GAME OVER!</h2>
+          <h2 style={{ color: '#f10909', fontSize: 'clamp(24px, 7vw, 36px)' }}>GAME OVER!</h2>
           <button
             onClick={() => setGameState('menu')}
             style={{
               padding: '15px 30px',
-              fontSize: '20px',
+              fontSize: 'clamp(14px, 4vw, 20px)',
               background: '#990099',
               color: '#FFF',
               border: '3px solid #000',
@@ -768,14 +788,14 @@ const DOWNBEAT = () => {
       
       {gameState === 'complete' && (
         <div style={{ textAlign: 'center' }}>
-          <h2 style={{ color: '#ffa227', fontSize: '36px' }}>
+          <h2 style={{ color: '#ffa227', fontSize: 'clamp(20px, 6vw, 36px)' }}>
             {gameRef.current.hearts === MAX_HEARTS ? 'PERFECT RUN!' : 'SONG COMPLETE!'}
           </h2>
           <button
             onClick={() => setGameState('menu')}
             style={{
               padding: '15px 30px',
-              fontSize: '20px',
+              fontSize: 'clamp(14px, 4vw, 20px)',
               background: '#990099',
               color: '#FFF',
               border: '3px solid #000',
