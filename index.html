@@ -52,6 +52,15 @@ const DOWNBEAT = () => {
   const [canvasScale, setCanvasScale] = useState(4);
   const [isMobile, setIsMobile] = useState(false);
   
+  // Load retro font
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    return () => document.head.removeChild(link);
+  }, []);
+  
   // Calculate responsive canvas scale
   useEffect(() => {
     const updateScale = () => {
@@ -77,23 +86,13 @@ const DOWNBEAT = () => {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
   
-  // Responsive positioning
-  const GROUND_Y = isMobile ? 40 : 60; // Higher on mobile, lower on desktop
-  const GROUND_LINE_Y = isMobile ? 56 : 76;
-  // Load retro font
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-    return () => document.head.removeChild(link);
-  }, []);
-  
   // Game constants
   const CANVAS_WIDTH = 160;
   const CANVAS_HEIGHT = 96;
   const SCALE = 4; // Default scale for desktop
   const PLAYER_X = 40;
+  const GROUND_Y = isMobile ? 40 : 60; // Higher on mobile, lower on desktop
+  const GROUND_LINE_Y = isMobile ? 56 : 76;
   const JUMP_FRAMES = 36;
   const NOTE_Y = GROUND_Y + 8; // Note position (bottom on ground)
   const NOTE_SPAWN_X = 168;
