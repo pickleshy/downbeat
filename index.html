@@ -41,6 +41,9 @@
     <script type="text/babel">
 const { useState, useEffect, useRef } = React;
 
+// Version injected by GitHub Actions
+const VERSION = "__VERSION__";
+
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
 // Jump over musical note obstacles to perform Maple Leaf Rag!
@@ -729,7 +732,10 @@ const DOWNBEAT = () => {
             textAlign: 'center'
           }}>
             Original Intellivision game by Shaya Bendix Lyon<br/>
-            Maple Leaf Rag by Scott Joplin (1899)
+            Maple Leaf Rag by Scott Joplin (1899)<br/>
+            <span style={{ fontSize: 'clamp(6px, 2vw, 10px)', color: '#444' }}>
+              Build {VERSION.substring(0, 7)}
+            </span>
           </p>
         </div>
       )}
