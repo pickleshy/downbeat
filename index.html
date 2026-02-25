@@ -52,8 +52,8 @@ const DOWNBEAT = () => {
   const canvasRef = useRef(null);
   const [gameState, setGameState] = useState('menu'); // menu, levelselect, playing, gameover, complete
   const [currentLevel, setCurrentLevel] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(4);
-  const [isMobile, setIsMobile] = useState(false);
+  const [canvasScale, setCanvasScale] = useState(typeof window !== 'undefined' && window.innerWidth >= 768 ? 4 : 1);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
   
   // Load retro font
   useEffect(() => {
