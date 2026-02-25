@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.5 pn";
+const VERSION = "1.1.6 cute";
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -109,16 +109,16 @@ const DOWNBEAT = () => {
   
   // Sprite graphics (from IntyBASIC GRAM data)
   const sprites = {
-    // Player alien (8x8, stretched to 8x16) - REDESIGNED
+    // Player alien (8x8, stretched to 8x16) - CUTE VERSION
     player: [
       '..XXXX..',
       '.XXXXXX.',
       'XX.XX.XX',
       'XXXXXXXX',
       '..XXXX..',
-      '.XXXXXX.',
-      '.XX..XX.',
-      'XX....XX'
+      '.X.XX.X.',
+      'XX.XX.XX',
+      'X......X'
     ],
     // Player celebration (hands up!)
     celebration: [
@@ -591,7 +591,7 @@ const DOWNBEAT = () => {
     
     // Hearts (top right) - only show filled hearts, positioned from right edge
     const heartSpacing = 10;
-    const heartY = isMobile ? 4 : 2; // Double distance on mobile
+    const heartY = isMobile ? 2 : 2; // Very close to top on both mobile and desktop
     const heartStartX = CANVAS_WIDTH - 8 - heartSpacing;
     for (let i = 0; i < game.hearts; i++) {
       const x = heartStartX - i * heartSpacing;
