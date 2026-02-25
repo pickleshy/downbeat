@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // Version injected by GitHub Actions
-const VERSION = "8a7d83cebea172d7c3f7b5cd09b77dce4e5a861d";
+const VERSION = "d70751090a85cb384e20aa15634e6ee2e0881c89";
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -52,8 +52,8 @@ const DOWNBEAT = () => {
   const canvasRef = useRef(null);
   const [gameState, setGameState] = useState('menu'); // menu, levelselect, playing, gameover, complete
   const [currentLevel, setCurrentLevel] = useState(0);
-  const [canvasScale, setCanvasScale] = useState(4);
-  const [isMobile, setIsMobile] = useState(false);
+  const [canvasScale, setCanvasScale] = useState(typeof window !== 'undefined' && window.innerWidth >= 768 ? 4 : 1);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
   
   // Load retro font
   useEffect(() => {
