@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.0";
+const VERSION = "1.1.1";
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -70,9 +70,13 @@ const DOWNBEAT = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       
+      console.log('Window width:', window.innerWidth);
+      console.log('isMobile:', mobile);
+      
       if (mobile) {
         // Mobile: fill screen with objectFit (handled by CSS)
         setCanvasScale(1); // Not used in mobile, but set for consistency
+        console.log('Set canvasScale to 1 (mobile)');
       } else {
         // Desktop: maintain reasonable size
         const maxWidth = Math.min(window.innerWidth - 100, 800);
@@ -80,6 +84,9 @@ const DOWNBEAT = () => {
         const scaleByWidth = Math.floor(maxWidth / CANVAS_WIDTH);
         const scaleByHeight = Math.floor(maxHeight / CANVAS_HEIGHT);
         const scale = Math.max(2, Math.min(scaleByWidth, scaleByHeight, 5));
+        console.log('Desktop scale calculation:', {
+          maxWidth, maxHeight, scaleByWidth, scaleByHeight, finalScale: scale
+        });
         setCanvasScale(scale);
       }
     };
@@ -777,7 +784,8 @@ const DOWNBEAT = () => {
               imageRendering: 'pixelated',
               width: isMobile ? '100vw' : `${CANVAS_WIDTH * canvasScale}px`,
               height: isMobile ? '100vh' : `${CANVAS_HEIGHT * canvasScale}px`,
-              objectFit: isMobile ? 'contain' : 'none'
+              objectFit: isMobile ? 'contain' : 'none',
+              border: '2px solid red' // DEBUG: temporary to see canvas size
             }}
           />
         </div>
