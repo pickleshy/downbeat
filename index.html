@@ -747,18 +747,42 @@ const DOWNBEAT = () => {
       
       {gameState === 'playing' && (
         <div style={{ 
-          border: '4px solid #FFF', 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
           background: '#000',
-          boxShadow: '0 0 20px rgba(255,255,255,0.3)'
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
+          {/* Title overlay */}
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: '#ffa227',
+            fontSize: 'clamp(16px, 5vw, 24px)',
+            fontFamily: '"Press Start 2P", "Courier New", monospace',
+            textShadow: '2px 2px 0 #000',
+            zIndex: 10,
+            pointerEvents: 'none'
+          }}>
+            DOWNBEAT!
+          </div>
+          
           <canvas
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
             style={{ 
-              imageRendering: 'pixelated', 
-              width: `${CANVAS_WIDTH * canvasScale}px`, 
-              height: `${CANVAS_HEIGHT * canvasScale}px` 
+              imageRendering: 'pixelated',
+              width: '100vw',
+              height: '100vh',
+              objectFit: 'contain'
             }}
           />
         </div>
