@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.3";
+const VERSION = "1.1.4";
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -771,17 +771,23 @@ const DOWNBEAT = () => {
             DOWNBEAT!
           </div>
           
-          <canvas
-            ref={canvasRef}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            style={{ 
-              imageRendering: 'pixelated',
-              width: isMobile ? '100vw' : `${CANVAS_WIDTH * canvasScale}px`,
-              height: isMobile ? '100vh' : `${CANVAS_HEIGHT * canvasScale}px`,
-              objectFit: isMobile ? 'contain' : 'none'
-            }}
-          />
+          <div style={{
+            transform: isMobile ? 'none' : `scale(${canvasScale})`,
+            transformOrigin: 'center',
+            imageRendering: 'pixelated'
+          }}>
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+              style={{ 
+                imageRendering: 'pixelated',
+                width: isMobile ? '100vw' : `${CANVAS_WIDTH}px`,
+                height: isMobile ? '100vh' : `${CANVAS_HEIGHT}px`,
+                objectFit: isMobile ? 'contain' : 'none'
+              }}
+            />
+          </div>
         </div>
       )}
       
