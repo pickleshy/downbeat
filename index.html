@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.4";
+const VERSION = "1.1.5 pn";
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -109,7 +109,7 @@ const DOWNBEAT = () => {
   
   // Sprite graphics (from IntyBASIC GRAM data)
   const sprites = {
-    // Player alien (8x8, stretched to 8x16)
+    // Player alien (8x8, stretched to 8x16) - REDESIGNED
     player: [
       '..XXXX..',
       '.XXXXXX.',
@@ -117,8 +117,8 @@ const DOWNBEAT = () => {
       'XXXXXXXX',
       '..XXXX..',
       '.XXXXXX.',
-      '.X.XX.X.',
-      '.X....X.'
+      '.XX..XX.',
+      'XX....XX'
     ],
     // Player celebration (hands up!)
     celebration: [
