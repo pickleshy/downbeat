@@ -50,13 +50,15 @@ const DOWNBEAT = () => {
   const [gameState, setGameState] = useState('menu'); // menu, levelselect, playing, gameover, complete
   const [currentLevel, setCurrentLevel] = useState(0);
   const [canvasScale, setCanvasScale] = useState(4);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Calculate responsive canvas scale
   useEffect(() => {
     const updateScale = () => {
-      const isMobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
       
-      if (isMobile) {
+      if (mobile) {
         // Mobile: fill screen with objectFit (handled by CSS)
         setCanvasScale(1); // Not used in mobile, but set for consistency
       } else {
@@ -75,6 +77,9 @@ const DOWNBEAT = () => {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
   
+  // Responsive positioning
+  const GROUND_Y = isMobile ? 40 : 60; // Higher on mobile, lower on desktop
+  const GROUND_LINE_Y = isMobile ? 56 : 76;
   // Load retro font
   useEffect(() => {
     const link = document.createElement('link');
@@ -89,11 +94,6 @@ const DOWNBEAT = () => {
   const CANVAS_HEIGHT = 96;
   const SCALE = 4; // Default scale for desktop
   const PLAYER_X = 40;
-  
-  // Responsive positioning
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const GROUND_Y = isMobile ? 40 : 60; // Higher on mobile, lower on desktop
-  const GROUND_LINE_Y = isMobile ? 56 : 76;
   const JUMP_FRAMES = 36;
   const NOTE_Y = GROUND_Y + 8; // Note position (bottom on ground)
   const NOTE_SPAWN_X = 168;
@@ -587,8 +587,7 @@ const DOWNBEAT = () => {
     
     // Hearts (top right) - only show filled hearts, positioned from right edge
     const heartSpacing = 10;
-    const isMobile = window.innerWidth < 768;
-    const heartY = isMobile ? 4 : 2; // Double distance on mobile (ground is higher, so hearts need more room)
+    const heartY = isMobile ? 4 : 2; // Double distance on mobile
     const heartStartX = CANVAS_WIDTH - 8 - heartSpacing;
     for (let i = 0; i < game.hearts; i++) {
       const x = heartStartX - i * heartSpacing;
@@ -771,9 +770,9 @@ const DOWNBEAT = () => {
             height={CANVAS_HEIGHT}
             style={{ 
               imageRendering: 'pixelated',
-              width: window.innerWidth < 768 ? '100vw' : `${CANVAS_WIDTH * canvasScale}px`,
-              height: window.innerWidth < 768 ? '100vh' : `${CANVAS_HEIGHT * canvasScale}px`,
-              objectFit: window.innerWidth < 768 ? 'contain' : 'none'
+              width: isMobile ? '100vw' : `${CANVAS_WIDTH * canvasScale}px`,
+              height: isMobile ? '100vh' : `${CANVAS_HEIGHT * canvasScale}px`,
+              objectFit: isMobile ? 'contain' : 'none'
             }}
           />
         </div>
