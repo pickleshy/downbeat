@@ -578,9 +578,10 @@ const DOWNBEAT = () => {
     const heartSpacing = 10;
     const heartsWidth = game.hearts * heartSpacing;
     const heartStartX = CANVAS_WIDTH - 8 - heartSpacing; // Start from right edge minus one heart
+    const heartY = 2; // Very close to top edge
     for (let i = 0; i < game.hearts; i++) {
       const x = heartStartX - i * heartSpacing;
-      drawSprite(ctx, sprites.heart, x, 0, '#990099');
+      drawSprite(ctx, sprites.heart, x, heartY, '#990099');
     }
     
     // Notes (cyan spaceships!)
@@ -673,21 +674,38 @@ const DOWNBEAT = () => {
           <p style={{ marginBottom: '30px', fontSize: 'clamp(14px, 4vw, 18px)' }}>
             A rhythm runner
           </p>
-          <button
-            onClick={() => setGameState('levelselect')}
-            style={{
-              padding: '15px 30px',
-              fontSize: 'clamp(14px, 4vw, 20px)',
-              background: '#990099',
-              color: '#FFF',
-              border: '3px solid #000',
-              cursor: 'pointer',
-              fontFamily: '"Press Start 2P", "Courier New", monospace',
-              fontWeight: 'bold'
-            }}
-          >
-            CHOOSE LEVEL
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '30px' }}>
+            <button
+              onClick={() => startGame(0)}
+              style={{
+                padding: '15px 30px',
+                fontSize: 'clamp(12px, 3.5vw, 18px)',
+                background: '#4d02d9',
+                color: '#FFF',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: '"Press Start 2P", "Courier New", monospace',
+                fontWeight: 'bold'
+              }}
+            >
+              1: MAPLE LEAF RAG
+            </button>
+            <button
+              onClick={() => startGame(1)}
+              style={{
+                padding: '15px 30px',
+                fontSize: 'clamp(12px, 3.5vw, 18px)',
+                background: '#990099',
+                color: '#FFF',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: '"Press Start 2P", "Courier New", monospace',
+                fontWeight: 'bold'
+              }}
+            >
+              2: PENCIL DROP
+            </button>
+          </div>
           <p style={{ marginTop: '30px', fontSize: 'clamp(10px, 3vw, 14px)', color: '#AAA' }}>
             Controls: SPACE or ↑ or TAP to jump<br/>
             Press again near peak to float!<br/>
@@ -707,44 +725,6 @@ const DOWNBEAT = () => {
         </div>
       )}
       
-      {gameState === 'levelselect' && (
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{ color: '#0FF', marginBottom: '30px', fontSize: 'clamp(20px, 6vw, 32px)' }}>SELECT LEVEL</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <button
-              onClick={() => startGame(0)}
-              style={{
-                padding: '15px 30px',
-                fontSize: 'clamp(12px, 3.5vw, 18px)',
-                background: '#4d02d9',
-                color: '#FFF',
-                border: '3px solid #000',
-                cursor: 'pointer',
-                fontFamily: '"Press Start 2P", "Courier New", monospace',
-                fontWeight: 'bold'
-              }}
-            >
-              1: MAPLE LEAF RAG
-            </button>
-            <button
-              onClick={() => startGame(1)}
-              style={{
-                padding: '15px 30px',
-                fontSize: 'clamp(12px, 3.5vw, 18px)',
-                background: '#990099',
-                color: '#FFF',
-                border: '3px solid #000',
-                cursor: 'pointer',
-                fontFamily: '"Press Start 2P", "Courier New", monospace',
-                fontWeight: 'bold'
-              }}
-            >
-              2: PENCIL DROP
-            </button>
-          </div>
-        </div>
-      )}
-      
       {gameState === 'playing' && (
         <div style={{ 
           position: 'fixed',
@@ -761,7 +741,7 @@ const DOWNBEAT = () => {
           {/* Title overlay */}
           <div style={{
             position: 'absolute',
-            top: '10px',
+            top: '30px',
             left: '50%',
             transform: 'translateX(-50%)',
             color: '#ffa227',
@@ -798,7 +778,7 @@ const DOWNBEAT = () => {
               fontSize: 'clamp(14px, 4vw, 20px)',
               background: '#990099',
               color: '#FFF',
-              border: '3px solid #000',
+              border: 'none',
               cursor: 'pointer',
               fontFamily: '"Press Start 2P", "Courier New", monospace',
               fontWeight: 'bold',
@@ -822,7 +802,7 @@ const DOWNBEAT = () => {
               fontSize: 'clamp(14px, 4vw, 20px)',
               background: '#990099',
               color: '#FFF',
-              border: '3px solid #000',
+              border: 'none',
               cursor: 'pointer',
               fontFamily: '"Press Start 2P", "Courier New", monospace',
               fontWeight: 'bold',
