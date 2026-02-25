@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.1";
+const VERSION = "1.0.0";
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -54,6 +54,10 @@ const DOWNBEAT = () => {
   const [currentLevel, setCurrentLevel] = useState(0);
   const [canvasScale, setCanvasScale] = useState(typeof window !== 'undefined' && window.innerWidth >= 768 ? 4 : 1);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+  
+  // Game constants - MUST be defined before useEffect that uses them
+  const CANVAS_WIDTH = 160;
+  const CANVAS_HEIGHT = 96;
   
   // Load retro font
   useEffect(() => {
@@ -97,8 +101,6 @@ const DOWNBEAT = () => {
   }, []);
   
   // Game constants
-  const CANVAS_WIDTH = 160;
-  const CANVAS_HEIGHT = 96;
   const SCALE = 4; // Default scale for desktop
   const PLAYER_X = 40;
   const GROUND_Y = isMobile ? 40 : 60; // Higher on mobile, lower on desktop
