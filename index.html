@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>DOWNBEAT! - A Rhythm Runner</title>
-    <meta name="description" content="Jump over musical notes to perform Scott Joplin's Maple Leaf Rag in this retro rhythm runner game!">
+    <meta name="description" content="Jump over musical notes to great music in this retro rhythm runner game!">
     <style>
         body {
             margin: 0;
@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.8 warrior";  // Added Level 3: A Warrior's Legacy
+const VERSION = "1.1.10 warrior";  // Fixed power-up spawning and collection
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -581,7 +581,7 @@ const DOWNBEAT = () => {
                 game.flowerSpawnTimer = 30;
               } else {
                 game.flower = {
-                  x: Math.floor(Math.random() * 60) + 80,
+                  x: Math.floor(Math.random() * 60) + 100,
                   y: 0,
                   driftY: 0
                 };
@@ -728,7 +728,8 @@ const DOWNBEAT = () => {
                   x: Math.floor(Math.random() * 60) + 100,
                   y: 0,
                   driftY: 0,
-                  driftX: 0
+                  driftX: 0,
+                  bobDir: 0  // 0 = down, 1 = up
                 };
                 game.tubasSpawned++;
               }
@@ -804,15 +805,13 @@ const DOWNBEAT = () => {
           game.flower.y++;
         }
         
-        // Check collection
-        if (game.jumpActive) {
-          if (game.flower.x + 8 > PLAYER_X && game.flower.x < PLAYER_X + 8) {
-            if (game.flower.y + 8 > game.playerY && game.flower.y < game.playerY + 16) {
-              // Collected! +1 heart
-              game.hearts = Math.min(MAX_HEARTS, game.hearts + 1);
-              playNote(80, 0.1, 0.3); // Tinkle sound
-              game.flower = null;
-            }
+        // Check collection (player can collect on ground or in air)
+        if (game.flower.x + 8 > PLAYER_X && game.flower.x < PLAYER_X + 8) {
+          if (game.flower.y + 8 > game.playerY && game.flower.y < game.playerY + 16) {
+            // Collected! +1 heart
+            game.hearts = Math.min(MAX_HEARTS, game.hearts + 1);
+            playNote(80, 0.1, 0.3); // Tinkle sound
+            game.flower = null;
           }
         }
         
@@ -827,27 +826,48 @@ const DOWNBEAT = () => {
         game.tuba.driftY++;
         game.tuba.driftX++;
         
-        // Drift left slower than flowers (every 3 frames vs every 2)
-        if (game.tuba.driftX >= 3) {
+        // Drift left every 2 frames (same speed as flower)
+        if (game.tuba.driftX >= 2) {
           game.tuba.driftX = 0;
           game.tuba.x = Math.max(0, game.tuba.x - 1);
         }
         
-        // Drift down slower than flowers (every 5 frames vs every 3)
-        if (game.tuba.driftY >= 5) {
-          game.tuba.driftY = 0;
-          game.tuba.y++;
+        // Vertical movement: fall to Y=30, then bob between 30-50
+        if (game.tuba.y < 30) {
+          // Falling phase: 1px down every 2 frames
+          if (game.tuba.driftY >= 2) {
+            game.tuba.driftY = 0;
+            game.tuba.y++;
+          }
+        } else {
+          // Bobbing phase: oscillate between Y=30 and Y=50
+          if (game.tuba.driftY >= 4) {
+            game.tuba.driftY = 0;
+            if (!game.tuba.bobDir) {
+              // Moving down
+              if (game.tuba.y < 50) {
+                game.tuba.y++;
+              } else {
+                game.tuba.bobDir = 1; // Switch to moving up
+              }
+            } else {
+              // Moving up
+              if (game.tuba.y > 30) {
+                game.tuba.y--;
+              } else {
+                game.tuba.bobDir = 0; // Switch to moving down
+              }
+            }
+          }
         }
         
-        // Check collection
-        if (game.jumpActive) {
-          if (game.tuba.x + 8 > PLAYER_X && game.tuba.x < PLAYER_X + 8) {
-            if (game.tuba.y + 8 > game.playerY && game.tuba.y < game.playerY + 16) {
-              // Collected! 10 seconds of immunity
-              game.immunityTimer = 600;
-              playFanfare();
-              game.tuba = null;
-            }
+        // Check collection (player can collect on ground or in air)
+        if (game.tuba.x + 8 > PLAYER_X && game.tuba.x < PLAYER_X + 8) {
+          if (game.tuba.y + 8 > game.playerY && game.tuba.y < game.playerY + 16) {
+            // Collected! 10 seconds of immunity
+            game.immunityTimer = 600;
+            playFanfare();
+            game.tuba = null;
           }
         }
         
