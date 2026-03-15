@@ -42,7 +42,7 @@
 const { useState, useEffect, useRef } = React;
 
 // VERSION - Update this manually when deploying
-const VERSION = "1.1.7 celeb";
+const VERSION = "1.1.8 warrior";  // Added Level 3: A Warrior's Legacy
 
 // DOWNBEAT! - Ragtime Runner Game
 // Browser port of the Intellivision IntyBASIC version
@@ -131,6 +131,17 @@ const DOWNBEAT = () => {
       '..XXXX..',
       '..X..X..'
     ],
+    // Player scream (hit reaction) - "The Scream" painting style!
+    scream: [
+      'XX....XX',
+      'XX....XX',
+      '.XXXXXX.',
+      'XX.XX.XX',
+      '..XXXX..',
+      '..XXXX..',
+      '..X..X..',
+      '..X..X..'
+    ],
     // Note obstacle (quarter note)
     note: [
       '...XX...',
@@ -174,6 +185,28 @@ const DOWNBEAT = () => {
       '...XX...',
       '...XX...',
       '...XX...'
+    ],
+    // Sneeze cloud (8x8)
+    sneeze: [
+      '........',
+      '.X.X.X..',
+      'X.X.X.X.',
+      '.X.X.X.X',
+      'X.X.X.X.',
+      '.X.X.X..',
+      '..X.X...',
+      '........'
+    ],
+    // Golden Tuba (8x8)
+    tuba: [
+      '..XXXX..',
+      '.XXXXXX.',
+      'XXXXXXXX',
+      'XX.XX.XX',
+      'XX....XX',
+      '.XX..XX.',
+      '..XXXX..',
+      '...XX...'
     ]
   };
   
@@ -199,7 +232,16 @@ const DOWNBEAT = () => {
     flowersSpawned: 0,
     keys: {},
     buttonReleased: true,
-    animFrame: 0
+    animFrame: 0,
+    hurtTimer: 0,  // New: frames remaining in hurt animation
+    sneezeTimer: 0,  // Frames remaining in sneeze shake
+    sneezeSpawnTimer: 0,  // Countdown to next sneeze spawn
+    sneezesSpawned: 0,  // How many sneezes have happened
+    sneezeOffset: { x: 0, y: 0 },  // Current shake offset
+    tuba: null,  // Golden tuba power-up
+    tubaSpawnTimer: 0,  // Countdown to tuba spawn
+    tubasSpawned: 0,  // How many tubas spawned
+    immunityTimer: 0  // Frames of invincibility remaining
   });
   
   // Jump arc (parabolic)
@@ -230,6 +272,37 @@ const DOWNBEAT = () => {
     0,0,1,0,1,0,0,0,0,0,0,1,0,0,0,0,
     0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,
     1,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0
+  ];
+  
+  // Level 3: A Warrior's Legacy - Stage 1 (easy, 7 obstacles)
+  const melodyData3 = [
+    1524,0,1524,0,0,0,0,0,
+    1524,0,0,0,1524,0,1524,1524,
+    254,0,1524,0,0,0,0,0,
+    1524,0,0,0,285,0,1524,1524,
+    214,0,1524,0,339,0,0,0,
+    1524,0,0,0,381,0,1524,1524,
+    1524,0,1524,0,0,0,0,0,
+    508,0,0,0,480,0,1524,1524,
+    1524,0,0,0,428,0,0,0,
+    571,0,0,0,508,0,0,0,
+    0,0,508,0,508,0,508,0,
+    508,508,508,508,480,0,0,0,
+    0,0,480,0,480,0,480,0,
+    480,480,480,480,571,0,0,0,
+    0,0,571,0,571,0,571,0,
+    571,0,480,0,571,0,0,0
+  ];
+  
+  const obstacleMap3 = [
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,
+    0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0
   ];
   
   // Audio context
@@ -269,6 +342,104 @@ const DOWNBEAT = () => {
     if (psg === 0) return playNote(200, 0.1, 0.4);
     const dudPsg = psg + Math.floor(psg / 16);
     playNote(dudPsg, 0.1, 0.4);
+  };
+  
+  const playOuch = () => {
+    // "Ouch!" sound - two syllables: AW + CH
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    const startTime = ctx.currentTime + 0.05; // Start 50ms later to avoid conflict with dud
+    
+    // First syllable: "AW" (low vowel sound) - LOUDER
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.value = 400;
+    gain1.gain.setValueAtTime(0.3, startTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, startTime + 0.12);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(startTime);
+    osc1.stop(startTime + 0.12);
+    
+    // Second syllable: "CH" (higher hiss/noise) - LOUDER
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.value = 1200;
+    gain2.gain.setValueAtTime(0.25, startTime + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(startTime + 0.1);
+    osc2.stop(startTime + 0.2);
+  };
+  
+  const playAchoo = () => {
+    // "ACHOO!" sound - AH + CHOO (more phonetic)
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    
+    // "AH" syllable - deeper, vowel sound
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'triangle';  // Softer vowel sound
+    osc1.frequency.value = 250;  // Lower pitch
+    gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.2);
+    
+    // "CH" consonant - brief noise burst
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.value = 2000;
+    gain2.gain.setValueAtTime(0.15, ctx.currentTime + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(ctx.currentTime + 0.15);
+    osc2.stop(ctx.currentTime + 0.25);
+    
+    // "OO" syllable - sustained vowel
+    const osc3 = ctx.createOscillator();
+    const gain3 = ctx.createGain();
+    osc3.type = 'triangle';
+    osc3.frequency.setValueAtTime(400, ctx.currentTime + 0.2);
+    osc3.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.5);
+    gain3.gain.setValueAtTime(0.25, ctx.currentTime + 0.2);
+    gain3.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    osc3.connect(gain3);
+    gain3.connect(ctx.destination);
+    osc3.start(ctx.currentTime + 0.2);
+    osc3.stop(ctx.currentTime + 0.5);
+  };
+  
+  const playFanfare = () => {
+    // Triumphant trumpet fanfare - ascending notes
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    const notes = [262, 330, 392, 523]; // C, E, G, high C
+    
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      const startTime = ctx.currentTime + i * 0.1;
+      gain.gain.setValueAtTime(0.2, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.15);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.15);
+    });
   };
   
   // Draw sprite helper
@@ -313,6 +484,15 @@ const DOWNBEAT = () => {
     game.flowersSpawned = 0;
     game.buttonReleased = true;
     game.animFrame = 0;
+    game.hurtTimer = 0;
+    game.sneezeTimer = 0;
+    game.sneezeSpawnTimer = Math.floor(Math.random() * 300) + 200; // First sneeze between beat 33-83
+    game.sneezesSpawned = 0;
+    game.sneezeOffset = { x: 0, y: 0 };
+    game.tuba = null;
+    game.tubaSpawnTimer = Math.floor(Math.random() * 400) + 300; // Random spawn in window
+    game.tubasSpawned = 0;
+    game.immunityTimer = 0;
   };
   
   // Game loop
@@ -333,20 +513,23 @@ const DOWNBEAT = () => {
           game.spawnCountdown = FRAMES_PER_NOTE;
           
           // Play melody note
-          const psg = melodyData[game.beatCounter];
+          const levelMelody = currentLevel === 2 ? melodyData3 : melodyData;
+          const psg = levelMelody[game.beatCounter];
           if (psg > 0) {
             playNote(psg, 0.15, 0.15);
           }
           
           // Spawn obstacles
+          const levelObstacles = currentLevel === 2 ? obstacleMap3 : obstacleMap;
           const spawnBeat = game.beatCounter + SPAWN_OFFSET;
-          if (spawnBeat < MELODY_LENGTH && obstacleMap[spawnBeat] === 1) {
+          if (spawnBeat < MELODY_LENGTH && levelObstacles[spawnBeat] === 1) {
             game.notes.push({
               x: NOTE_SPAWN_X,
               xFrac: 0,
               y: NOTE_Y,
               cleared: false,
-              psg: melodyData[spawnBeat]
+              psg: levelMelody[spawnBeat],
+              wobbleTimer: 0  // Wobble animation timer
             });
           }
           
@@ -357,7 +540,7 @@ const DOWNBEAT = () => {
         }
       }
       
-      // Pencil spawning (Level 1 only)
+      // Pencil spawning (Level 1 only - NOT Level 3)
       if (currentLevel === 1) {
         if (game.pencilsSpawned < 2 && !game.songDone) {
           if (game.beatCounter >= 20 && game.beatCounter < 108) {
@@ -385,8 +568,8 @@ const DOWNBEAT = () => {
         }
       }
       
-      // Flower spawning (Level 1 only)
-      if (currentLevel === 1) {
+      // Flower spawning (Levels 1 and 3)
+      if (currentLevel === 1 || currentLevel === 2) {
         if (!game.flower && game.flowersSpawned < 2 && !game.songDone) {
           if (game.beatCounter >= 55 && game.beatCounter < 95) {
             if (game.flowerSpawnTimer > 0) {
@@ -461,16 +644,26 @@ const DOWNBEAT = () => {
           note.x -= 1;
         }
         
+        // Update wobble animation if active
+        if (note.wobbleTimer > 0) {
+          note.wobbleTimer--;
+        }
+        
         // Collision
         if (!note.cleared && note.x < PLAYER_X) {
-          if (game.playerY + 12 > note.y) { // Use note.y instead of NOTE_Y constant
-            // Hit!
-            game.hearts--;
-            playDud(note.psg);
-            if (game.hearts <= 0) {
-              setGameState('gameover');
+          if (game.playerY + 12 > note.y) {
+            // Hit! (but skip damage if immune)
+            if (game.immunityTimer === 0) {
+              game.hearts--;
+              playDud(note.psg);
+              playOuch();  // "Ouch!" sound!
+              note.wobbleTimer = 12; // Wobble for 12 frames
+              game.hurtTimer = 10;   // Show scream sprite for 10 frames
+              if (game.hearts <= 0) {
+                setGameState('gameover');
+              }
             }
-            return false;
+            note.cleared = true;   // Mark as cleared either way
           }
           if (note.x < PLAYER_X - 10) {
             note.cleared = true;
@@ -479,6 +672,78 @@ const DOWNBEAT = () => {
         
         return note.x > -8;
       });
+      
+      // Update hurt animation
+      if (game.hurtTimer > 0) {
+        game.hurtTimer--;
+      }
+      
+      // Sneeze spawning (Level 1 only - NOT Level 3)
+      if (currentLevel === 1) {
+        if (game.sneezesSpawned < 2 && !game.songDone) {
+          // Spawn window: 20% to 90% of song (beat 25 to 115 out of 128)
+          if (game.beatCounter >= 25 && game.beatCounter < 115) {
+            if (game.sneezeSpawnTimer > 0) {
+              game.sneezeSpawnTimer--;
+            }
+            if (game.sneezeSpawnTimer === 0 && game.sneezeTimer === 0) {
+              // Trigger sneeze!
+              game.sneezeTimer = 180; // 3 seconds at 60 FPS
+              game.sneezesSpawned++;
+              playAchoo();
+              // Schedule next sneeze (if we haven't hit max)
+              if (game.sneezesSpawned < 2) {
+                game.sneezeSpawnTimer = Math.floor(Math.random() * 300) + 300;
+              }
+            }
+          }
+        }
+      }
+      
+      // Update sneeze shake
+      if (game.sneezeTimer > 0) {
+        game.sneezeTimer--;
+        // Generate random shake offset each frame
+        game.sneezeOffset = {
+          x: Math.floor(Math.random() * 7) - 3, // -3 to +3
+          y: Math.floor(Math.random() * 7) - 3
+        };
+      } else {
+        game.sneezeOffset = { x: 0, y: 0 };
+      }
+      
+      // Tuba spawning (Levels 1 and 3)
+      if (currentLevel === 1 || currentLevel === 2) {
+        if (!game.tuba && game.tubasSpawned < 1 && !game.songDone) {
+          // Spawn window: 25% to 75% of song (beat 32 to 96 out of 128)
+          if (game.beatCounter >= 32 && game.beatCounter < 96) {
+            if (game.tubaSpawnTimer > 0) {
+              game.tubaSpawnTimer--;
+            }
+            if (game.tubaSpawnTimer === 0) {
+              // Don't spawn during sneeze or if pencil falling
+              const hasFalling = game.pencils.some(p => p.state === 'falling');
+              if (game.sneezeTimer === 0 && !hasFalling) {
+                game.tuba = {
+                  x: Math.floor(Math.random() * 60) + 100,
+                  y: 0,
+                  driftY: 0,
+                  driftX: 0
+                };
+                game.tubasSpawned++;
+              }
+            }
+          }
+        }
+      }
+      
+      // Update immunity timer
+      if (game.immunityTimer > 0) {
+        game.immunityTimer--;
+        if (game.songDone) {
+          game.immunityTimer = 0; // End early if song completes
+        }
+      }
       
       // Update pencils (Level 1)
       if (currentLevel === 1) {
@@ -500,12 +765,17 @@ const DOWNBEAT = () => {
             if (!pencil.cleared && game.jumpActive) {
               if (pencil.x + 8 > PLAYER_X && pencil.x < PLAYER_X + 8) {
                 if (pencil.y + 8 > game.playerY && pencil.y < game.playerY + 16) {
-                  game.hearts--;
-                  playDud(200);
-                  if (game.hearts <= 0) {
-                    setGameState('gameover');
+                  // Hit by pencil! (but skip damage if immune)
+                  if (game.immunityTimer === 0) {
+                    game.hearts--;
+                    playDud(200);
+                    playOuch();  // "Ouch!" sound!
+                    game.hurtTimer = 10;  // Show scream sprite
+                    if (game.hearts <= 0) {
+                      setGameState('gameover');
+                    }
                   }
-                  return false;
+                  return false; // Remove pencil either way
                 }
               }
             }
@@ -519,8 +789,8 @@ const DOWNBEAT = () => {
         });
       }
       
-      // Update flower (Level 1)
-      if (currentLevel === 1 && game.flower) {
+      // Update flower (Levels 1 and 3)
+      if ((currentLevel === 1 || currentLevel === 2) && game.flower) {
         game.flower.driftY++;
         
         // Drift left (every 2 frames)
@@ -549,6 +819,41 @@ const DOWNBEAT = () => {
         // Remove if off screen
         if (game.flower && (game.flower.y > 90 || game.flower.x < -8)) {
           game.flower = null;
+        }
+      }
+      
+      // Update tuba (Levels 1 and 3)
+      if ((currentLevel === 1 || currentLevel === 2) && game.tuba) {
+        game.tuba.driftY++;
+        game.tuba.driftX++;
+        
+        // Drift left slower than flowers (every 3 frames vs every 2)
+        if (game.tuba.driftX >= 3) {
+          game.tuba.driftX = 0;
+          game.tuba.x = Math.max(0, game.tuba.x - 1);
+        }
+        
+        // Drift down slower than flowers (every 5 frames vs every 3)
+        if (game.tuba.driftY >= 5) {
+          game.tuba.driftY = 0;
+          game.tuba.y++;
+        }
+        
+        // Check collection
+        if (game.jumpActive) {
+          if (game.tuba.x + 8 > PLAYER_X && game.tuba.x < PLAYER_X + 8) {
+            if (game.tuba.y + 8 > game.playerY && game.tuba.y < game.playerY + 16) {
+              // Collected! 10 seconds of immunity
+              game.immunityTimer = 600;
+              playFanfare();
+              game.tuba = null;
+            }
+          }
+        }
+        
+        // Remove if off screen
+        if (game.tuba && (game.tuba.y > 90 || game.tuba.x < -8)) {
+          game.tuba = null;
         }
       }
       
@@ -581,9 +886,17 @@ const DOWNBEAT = () => {
     const ctx = canvas.getContext('2d');
     const game = gameRef.current;
     
-    // Clear
+    // Clear ENTIRE canvas first (prevents artifacts)
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, 160, 96);
+    
+    // Apply sneeze shake offset to drawing context
+    const offsetX = game.sneezeOffset.x;
+    const offsetY = game.sneezeOffset.y;
+    
+    // Save context and apply shake
+    ctx.save();
+    ctx.translate(offsetX, offsetY);
     
     // Ground
     ctx.fillStyle = '#FFF';
@@ -598,26 +911,75 @@ const DOWNBEAT = () => {
       drawSprite(ctx, sprites.heart, x, heartY, '#990099');
     }
     
-    // Notes (cyan spaceships!)
+    // Notes (cyan spaceships!) with wobble when hit
     game.notes.forEach(note => {
-      drawSprite(ctx, sprites.note, note.x, note.y, '#0FF');
+      let wobbleOffset = 0;
+      if (note.wobbleTimer > 0) {
+        // Rock left/right every 3 frames
+        const wobblePhase = Math.floor(note.wobbleTimer / 3) % 2;
+        wobbleOffset = wobblePhase === 0 ? -2 : 2;
+      }
+      drawSprite(ctx, sprites.note, note.x + wobbleOffset, note.y, '#0FF');
     });
     
-    // Pencils (Level 1)
+    // Level-specific hazards
     if (currentLevel === 1) {
+      // Level 2: Pencils + Flower + Tuba
       game.pencils.forEach(pencil => {
         drawSprite(ctx, sprites.pencil, pencil.x, pencil.y, '#FA0');
       });
       
-      // Flower
       if (game.flower) {
         drawSprite(ctx, sprites.flower, game.flower.x, game.flower.y, '#F0F');
+      }
+      
+      if (game.tuba) {
+        drawSprite(ctx, sprites.tuba, game.tuba.x, game.tuba.y, '#FFD700');
+      }
+    } else if (currentLevel === 2) {
+      // Level 3: Flower + Tuba only (no pencils)
+      if (game.flower) {
+        drawSprite(ctx, sprites.flower, game.flower.x, game.flower.y, '#F0F');
+      }
+      
+      if (game.tuba) {
+        drawSprite(ctx, sprites.tuba, game.tuba.x, game.tuba.y, '#FFD700');
       }
     }
     
     // Player (tomato red alien, stretched vertically)
-    const playerSprite = (game.songEndTimer > 0 && game.hearts > 0) ? sprites.celebration : sprites.player;
+    let playerSprite = sprites.player;
+    if (game.hurtTimer > 0) {
+      playerSprite = sprites.scream;  // Show scream when hurt
+    } else if (game.songEndTimer > 0 && game.hearts > 0) {
+      playerSprite = sprites.celebration;  // Celebrate when done
+    }
+    
+    // Draw golden glow outline if immune
+    if (game.immunityTimer > 0) {
+      drawSprite(ctx, playerSprite, PLAYER_X - 1, game.playerY - 1, '#FFD700', true); // Top-left
+      drawSprite(ctx, playerSprite, PLAYER_X + 1, game.playerY - 1, '#FFD700', true); // Top-right
+      drawSprite(ctx, playerSprite, PLAYER_X - 1, game.playerY + 1, '#FFD700', true); // Bottom-left
+      drawSprite(ctx, playerSprite, PLAYER_X + 1, game.playerY + 1, '#FFD700', true); // Bottom-right
+    }
+    
+    // Draw player on top
     drawSprite(ctx, playerSprite, PLAYER_X, game.playerY, '#f10909', true);
+    
+    // Restore context (end shake effect)
+    ctx.restore();
+    
+    // Draw sneeze cloud overlay (not affected by shake)
+    if (game.sneezeTimer > 0) {
+      // Animate sneeze cloud position
+      const cloudX = 70 + Math.sin(game.animFrame / 10) * 10;
+      const cloudY = 30 + Math.cos(game.animFrame / 8) * 5;
+      drawSprite(ctx, sprites.sneeze, cloudX, cloudY, '#FFF');
+      // Add text "ACHOO!" for extra clarity
+      ctx.fillStyle = '#FFF';
+      ctx.font = '4px monospace';
+      ctx.fillText('ACHOO!', 60, 20);
+    }
   };
   
   // Keyboard and Touch
@@ -719,13 +1081,28 @@ const DOWNBEAT = () => {
             >
               2: PENCIL DROP
             </button>
+            <button
+              onClick={() => startGame(2)}
+              style={{
+                padding: '15px 30px',
+                fontSize: 'clamp(12px, 3.5vw, 18px)',
+                background: '#0a7a5a',
+                color: '#FFF',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: '"Press Start 2P", "Courier New", monospace',
+                fontWeight: 'bold'
+              }}
+            >
+              3: WARRIOR'S LEGACY
+            </button>
           </div>
           <p style={{ marginTop: '30px', fontSize: 'clamp(10px, 3vw, 14px)', color: '#AAA' }}>
             Controls: SPACE or ↑ or TAP to jump<br/>
             Press again near peak to float!<br/>
             <br/>
             Jump over the notes.<br/>
-            Avoid the pencils. Catch the flowers!
+            Catch the flowers and golden tuba!
           </p>
           <p style={{ 
             marginTop: '30px', 
